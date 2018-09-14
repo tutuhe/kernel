@@ -32,6 +32,7 @@
 #include "rockchip_drm_vop.h"
 
 #define DRIVER_NAME    "dw-mipi-dsi"
+#define DBG(fmt, ...)  printk("%s-%d:" fmt, __FUNCTION__, __LINE__, ##__VA_ARGS__)
 
 #define IS_DSI0(dsi)	((dsi)->id == 0)
 #define IS_DSI1(dsi)	((dsi)->id == 1)
@@ -305,6 +306,7 @@ struct dw_mipi_dsi {
 	u32 channel;
 	u32 lanes;
 	u32 format;
+	u32 lvds_force_clk;
 	struct drm_display_mode mode;
 
 	const struct dw_mipi_dsi_plat_data *pdata;
@@ -702,6 +704,11 @@ static unsigned long dw_mipi_dsi_calc_bandwidth(struct dw_mipi_dsi *dsi)
 			dev_err(dsi->dev, "DPHY clock frequency is out of range\n");
 	}
 
+	if (!!dsi->lvds_force_clk) {
+		target_mbps = dsi->lvds_force_clk;
+		printk("target_mbps = %ld\n", target_mbps);
+	}
+
 	return target_mbps;
 }
 
@@ -777,6 +784,7 @@ static int dw_mipi_dsi_host_attach(struct mipi_dsi_host *host,
 	dsi->channel = device->channel;
 	dsi->format = device->format;
 	dsi->mode_flags = device->mode_flags;
+	dsi->lvds_force_clk = device->lvds_force_clk;
 
 	return 0;
 }
