@@ -2230,6 +2230,22 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
 							    card, mq);
 			else
 				mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
+
+			if (card->quirks & MMC_QUIRK_VENDOR_GYRFALCON) {
+				struct mmc_command *cmd = &(mq->mqrq_cur->brq.cmd);
+				int opcode = cmd->opcode;
+				unsigned int addr = cmd->arg;
+
+				if ((opcode == 17 || opcode == 18 || opcode == 24 || opcode == 25) && addr != 0x2000) {
+					pr_warn("%s: skip non 0x2000 address for Gyrfalcon chip\n",
+						req->rq_disk->disk_name);
+					while (ret)
+						ret = blk_end_request(req, -EIO,
+								      blk_rq_cur_bytes(req));
+					return 0;
+				}
+			}
+
 			areq = &mq->mqrq_cur->mmc_active;
 		} else
 			areq = NULL;
@@ -2769,6 +2785,8 @@ force_ro_fail:
 
 static const struct mmc_fixup blk_fixups[] =
 {
+	MMC_FIXUP(CID_NAME_ANY, 0xea, 0x60, add_quirk_mmc,
+		  MMC_QUIRK_VENDOR_GYRFALCON),
 	MMC_FIXUP("SEM02G", CID_MANFID_SANDISK, 0x100, add_quirk,
 		  MMC_QUIRK_INAND_CMD38),
 	MMC_FIXUP("SEM04G", CID_MANFID_SANDISK, 0x100, add_quirk,
