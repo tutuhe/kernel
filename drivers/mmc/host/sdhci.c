@@ -1074,8 +1074,8 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
 	else
 		flags = SDHCI_CMD_RESP_SHORT;
 
-	if (cmd->flags & MMC_RSP_CRC)
-		flags |= SDHCI_CMD_CRC;
+	//if (cmd->flags & MMC_RSP_CRC)
+	//	flags |= SDHCI_CMD_CRC;
 	if (cmd->flags & MMC_RSP_OPCODE)
 		flags |= SDHCI_CMD_INDEX;
 
