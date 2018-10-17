@@ -2237,11 +2237,8 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
 				unsigned int addr = cmd->arg;
 
 				if ((opcode == 17 || opcode == 18 || opcode == 24 || opcode == 25) && addr != 0x2000) {
-					pr_warn("%s: skip non 0x2000 address for Gyrfalcon chip\n",
-						req->rq_disk->disk_name);
-					while (ret)
-						ret = blk_end_request(req, -EIO,
-								      blk_rq_cur_bytes(req));
+					req->cmd_flags |= REQ_QUIET;
+					blk_end_request_cur(req, -EIO);
 					return 0;
 				}
 			}
