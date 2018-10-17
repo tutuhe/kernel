@@ -208,8 +208,6 @@ void mmc_request_done(struct mmc_host *host, struct mmc_request *mrq)
 
 EXPORT_SYMBOL(mmc_request_done);
 
-static struct mmc_command Stop = {0};
-
 static void __mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
 {
 	int err;
@@ -252,13 +250,16 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
 
 	if (mmc_card_removed(host->card))
 		return -ENOMEDIUM;
-	if (mrq->cmd->opcode == 25) {
-		Stop.opcode = MMC_STOP_TRANSMISSION;
-		Stop.arg = 	0; //0x95;
-		Stop.flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC;
-		//Stop.flags = MMC_RSP_R1 | MMC_CMD_AC;
-		mrq->stop = &Stop;
-	}
+
+        if (host->card
+            && host->card->quirks & MMC_QUIRK_VENDOR_GYRFALCON
+            && mrq->cmd->opcode == 25) {
+                static struct mmc_command stop = {
+                        .opcode = MMC_STOP_TRANSMISSION,
+                        .arg = 0,
+                        .flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC};
+                mrq->stop = &stop;
+        }
 
 	if (mrq->sbc) {
 		pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
