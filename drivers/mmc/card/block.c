@@ -2232,6 +2232,19 @@ static int mmc_blk_issue_rw_rq(struct mmc_queue *mq, struct request *rqc)
 							    card, mq);
 			else
 				mmc_blk_rw_rq_prep(mq->mqrq_cur, card, 0, mq);
+
+			if (card->quirks & MMC_QUIRK_VENDOR_GYRFALCON) {
+				struct mmc_command *cmd = &(mq->mqrq_cur->brq.cmd);
+				int opcode = cmd->opcode;
+				unsigned int addr = cmd->arg;
+
+				if ((opcode == 17 || opcode == 18 || opcode == 24 || opcode == 25) && addr != 0x2000) {
+					req->cmd_flags |= REQ_QUIET;
+					blk_end_request_cur(req, -EIO);
+					return 0;
+				}
+			}
+
 			areq = &mq->mqrq_cur->mmc_active;
 		} else
 			areq = NULL;
