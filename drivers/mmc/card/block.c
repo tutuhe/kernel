@@ -2884,6 +2884,11 @@ static int mmc_blk_probe(struct mmc_card *card)
 	}
 #endif
 
+	/* Enable CRC unless some cards */
+	if (!(card->quirks & MMC_QUIRK_VENDOR_GYRFALCON)) {
+		card->host->caps2 &= ~MMC_CAP2_NO_CRC;
+	}
+
 	if (mmc_add_disk(md))
 		goto out;
 

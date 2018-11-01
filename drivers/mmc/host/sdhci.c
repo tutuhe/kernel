@@ -1074,7 +1074,8 @@ void sdhci_send_command(struct sdhci_host *host, struct mmc_command *cmd)
 	else
 		flags = SDHCI_CMD_RESP_SHORT;
 
-	if (cmd->flags & MMC_RSP_CRC)
+	if (cmd->flags & MMC_RSP_CRC
+	    && !(host->mmc->caps2 & MMC_CAP2_NO_CRC))
 		flags |= SDHCI_CMD_CRC;
 	if (cmd->flags & MMC_RSP_OPCODE)
 		flags |= SDHCI_CMD_INDEX;
@@ -2927,6 +2928,8 @@ int sdhci_add_host(struct sdhci_host *host)
 	if (debug_quirks2)
 		host->quirks2 = debug_quirks2;
 
+	/* Disable CRC by default to be compatible with some cards */
+	mmc->caps2 |= MMC_CAP2_NO_CRC;
 	override_timeout_clk = host->timeout_clk;
 
 	sdhci_do_reset(host, SDHCI_RESET_ALL);
