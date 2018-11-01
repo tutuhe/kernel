@@ -2771,6 +2771,8 @@ force_ro_fail:
 
 static const struct mmc_fixup blk_fixups[] =
 {
+	MMC_FIXUP(CID_NAME_ANY, 0xea, 0x60, add_quirk_mmc,
+		  MMC_QUIRK_VENDOR_GYRFALCON | MMC_QUIRK_DISABLE_VENDOR_STORAGE),
 	MMC_FIXUP("SEM02G", CID_MANFID_SANDISK, 0x100, add_quirk,
 		  MMC_QUIRK_INAND_CMD38),
 	MMC_FIXUP("SEM04G", CID_MANFID_SANDISK, 0x100, add_quirk,
@@ -2873,7 +2875,8 @@ static int mmc_blk_probe(struct mmc_card *card)
 	dev_set_drvdata(&card->dev, md);
 
 #if defined(CONFIG_MMC_DW_ROCKCHIP) || defined(CONFIG_MMC_SDHCI_OF_ARASAN)
-	if (card->host->restrict_caps & RESTRICT_CARD_TYPE_EMMC) {
+	if (card->host->restrict_caps & RESTRICT_CARD_TYPE_EMMC
+	    && !(card->quirks & MMC_QUIRK_DISABLE_VENDOR_STORAGE)) {
 		this_card = card;
 		md->disk->is_rk_disk = true;
 	} else {

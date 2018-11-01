@@ -283,6 +283,8 @@ struct mmc_card {
 #define MMC_QUIRK_SEC_ERASE_TRIM_BROKEN (1<<10)	/* Skip secure for erase/trim */
 #define MMC_QUIRK_BROKEN_IRQ_POLLING	(1<<11)	/* Polling SDIO_CCCR_INTx could create a fake interrupt */
 #define MMC_QUIRK_TRIM_BROKEN	(1<<12)		/* Skip trim */
+#define MMC_QUIRK_DISABLE_VENDOR_STORAGE	(1<<13)	/* Disable vendor storage */
+#define MMC_QUIRK_VENDOR_GYRFALCON		(1<<31)	/* Quirk for Gyrfalcon chips */
 
 
 	unsigned int		erase_size;	/* erase size in sectors */

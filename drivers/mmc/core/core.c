@@ -251,6 +251,16 @@ static int mmc_start_request(struct mmc_host *host, struct mmc_request *mrq)
 	if (mmc_card_removed(host->card))
 		return -ENOMEDIUM;
 
+        if (host->card
+            && host->card->quirks & MMC_QUIRK_VENDOR_GYRFALCON
+            && mrq->cmd->opcode == 25) {
+                static struct mmc_command stop = {
+                        .opcode = MMC_STOP_TRANSMISSION,
+                        .arg = 0,
+                        .flags = MMC_RSP_SPI_R1B | MMC_RSP_R1B | MMC_CMD_AC};
+                mrq->stop = &stop;
+        }
+
 	if (mrq->sbc) {
 		pr_debug("<%s: starting CMD%u arg %08x flags %08x>\n",
 			 mmc_hostname(host), mrq->sbc->opcode,
