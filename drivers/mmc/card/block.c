@@ -2784,8 +2784,6 @@ force_ro_fail:
 
 static const struct mmc_fixup blk_fixups[] =
 {
-	MMC_FIXUP(CID_NAME_ANY, 0xea, 0x60, add_quirk_mmc,
-		  MMC_QUIRK_VENDOR_GYRFALCON | MMC_QUIRK_DISABLE_VENDOR_STORAGE),
 	MMC_FIXUP("SEM02G", CID_MANFID_SANDISK, 0x100, add_quirk,
 		  MMC_QUIRK_INAND_CMD38),
 	MMC_FIXUP("SEM04G", CID_MANFID_SANDISK, 0x100, add_quirk,

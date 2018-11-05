@@ -1568,7 +1568,7 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 			goto free_card;
 
 		if (card->cid.manfid == 0xea && card->cid.oemid == 0x60)
-			card->quirks |= MMC_QUIRK_VENDOR_GYRFALCON;
+			card->quirks |= MMC_QUIRK_VENDOR_GYRFALCON | MMC_QUIRK_DISABLE_VENDOR_STORAGE;
 	}
 
 	/*
