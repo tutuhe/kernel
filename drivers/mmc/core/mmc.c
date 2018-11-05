@@ -187,6 +187,10 @@ static void mmc_select_card_type(struct mmc_card *card)
 	unsigned int hs_max_dtr = 0, hs200_max_dtr = 0;
 	unsigned int avail_type = 0;
 
+	if (card->quirks & MMC_QUIRK_VENDOR_GYRFALCON) {
+		card_type |=  EXT_CSD_CARD_TYPE_DDR_1_8V;
+	}
+
 	if (caps & MMC_CAP_MMC_HIGHSPEED &&
 	    card_type & EXT_CSD_CARD_TYPE_HS_26) {
 		hs_max_dtr = MMC_HIGH_26_MAX_DTR;
@@ -988,6 +992,9 @@ static int mmc_select_bus_width(struct mmc_card *card)
 
 		if (!err) {
 			err = bus_width;
+			if (card->quirks & MMC_QUIRK_VENDOR_GYRFALCON)
+				// set blocklen to work around the chip bug
+				mmc_set_blocklen(card, 256);
 			break;
 		} else {
 			pr_warn("%s: switch to bus width %d failed\n",
@@ -1559,6 +1566,9 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
 		err = mmc_decode_cid(card);
 		if (err)
 			goto free_card;
+
+		if (card->cid.manfid == 0xea && card->cid.oemid == 0x60)
+			card->quirks |= MMC_QUIRK_VENDOR_GYRFALCON;
 	}
 
 	/*

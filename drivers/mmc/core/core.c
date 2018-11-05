@@ -2450,6 +2450,9 @@ int mmc_set_blocklen(struct mmc_card *card, unsigned int blocklen)
 {
 	struct mmc_command cmd = {0};
 
+	if (card->quirks & MMC_QUIRK_VENDOR_GYRFALCON)
+		;
+	else
 	if (mmc_card_blockaddr(card) || mmc_card_ddr52(card) ||
 	    mmc_card_hs400(card) || mmc_card_hs400es(card))
 		return 0;

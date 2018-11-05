@@ -1054,6 +1054,7 @@
 &sdhci {
 	bus-width = <8>;
 	keep-power-in-suspend;
+	mmc-ddr-1_8v;
 	mmc-hs400-1_8v;
 	mmc-hs400-enhanced-strobe;
 	non-removable;
