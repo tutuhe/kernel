@@ -65,7 +65,7 @@
 		regulator-max-microvolt = <1800000>;
 	};
 
-	rt5640-sound {
+	rt5640_sound: rt5640-sound {
 		compatible = "simple-audio-card";
 		simple-audio-card,format = "i2s";
 		simple-audio-card,name = "rockchip,rt5640-codec";
@@ -87,7 +87,7 @@
 		};
 	};
 
-	spdif-sound {
+	spdif_sound: spdif-sound {
 		status = "okay";
 		compatible = "simple-audio-card";
 		simple-audio-card,name = "ROCKCHIP,SPDIF";
