@@ -162,7 +162,7 @@
 		};
 	};
 
-	wireless-wlan {
+	wlan: wireless-wlan {
 		compatible = "wlan-platdata";
 		rockchip,grf = <&grf>;
 		wifi_chip_type = "ap6356s";
@@ -171,7 +171,7 @@
 		status = "okay";
 	};
 
-	wireless-bluetooth {
+	bluetooth: wireless-bluetooth {
 		compatible = "bluetooth-platdata";
 		clocks = <&rk808 1>;
 		clock-names = "ext_clock";
