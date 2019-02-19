@@ -48,6 +48,16 @@
 		status = "okay";
 	};
 
+	v2801_en: v2801-en {
+		compatible = "regulator-fixed";
+		enable-active-high;
+		gpio = <&gpio0 2 GPIO_ACTIVE_HIGH>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&v2801_en_h>;
+		regulator-name = "v2801_en";
+		regulator-always-on;
+	};
+
 	/delete-node/ vcc-sd;
 	sdmmc_pwrseq: sdmmc-pwrseq {
 		compatible = "mmc-pwrseq-simple";
@@ -64,19 +74,6 @@
 		reset-gpios = <&gpio1 20 GPIO_ACTIVE_LOW>; /* GPIO1_C4 */
 	};
 
-	leds {
-		compatible = "gpio-leds";
-
-		work {
-			gpios = <&gpio2 7 GPIO_ACTIVE_HIGH>;
-			default-state = "on";
-		};
-
-		user {
-			gpios = <&gpio2 2 GPIO_ACTIVE_HIGH>;
-			default-state = "off";
-		};
-	};
 };
 
 &cdn_dp {
@@ -145,13 +142,7 @@
 	dr_mode = "host";
 };
 
-&vcc3v3_pcie {
-    gpio = <&gpio0 13 GPIO_ACTIVE_HIGH>;
-};
 
-&vcc3v3_3g {
-    gpio = <&gpio2 6 GPIO_ACTIVE_HIGH>;
-};
 
 &uart4 {
     status = "disabled";
@@ -178,17 +169,6 @@
 };
 
 &pinctrl {
-	leds {
-		led_power: led-power {
-			rockchip,pins =
-				<2 7 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-
-		led_user: led-user {
-			rockchip,pins =
-				<2 2 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-	};
 
 	pcie {
 		pcie_drv: pcie-drv {
@@ -208,4 +188,12 @@
 				<1 20 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
+
+	sg {
+		v2801_en_h: v2801-en-h {
+			rockchip,pins =
+				<0 2 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
 };
