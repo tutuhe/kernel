@@ -84,7 +84,7 @@
 
     vccio_sd: sdmmcio-regulator {
         compatible = "regulator-gpio";
-        gpios = <&gpio0 25 GPIO_ACTIVE_HIGH>;
+        gpios = <&gpio0 27 GPIO_ACTIVE_HIGH>;
         states = <1800000 0x1
                   3300000 0x0>;
         regulator-name = "vccio_sd";
@@ -445,7 +445,7 @@
 
 	vccio1-supply = <&vcc_io>;
 	vccio2-supply = <&vcc18_emmc>;
-	vccio3-supply = <&vcc_io>;
+	vccio3-supply = <&vccio_sd>;
 	vccio4-supply = <&vdd_18>;
 	vccio5-supply = <&vcc_io>;
 	vccio6-supply = <&vcc_io>;
@@ -474,12 +474,6 @@
 	sdio-pwrseq {
 		wifi_enable_h: wifi-enable-h {
 			rockchip,pins = <3 8 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-	};
-
-	usb2 {
-		usb20_host_drv: usb20-host-drv {
-			rockchip,pins = <0 27 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
@@ -514,16 +508,18 @@
 	bus-width = <4>;
 	cap-mmc-highspeed;
 	cap-sd-highspeed;
+    sd-uhs-sdr104;
+    clock-frequency = <150000000>;
+    clock-freq-min-max = <400000 150000000>;
 	disable-wp;
-	max-frequency = <150000000>;
     num-slots = <1>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&sdmmc0_clk &sdmmc0_cmd &sdmmc0_dectn &sdmmc0_bus4>;
-    sd-uhs-sdr104;
+    supports-sd;
+	status = "okay";	
+    card-detect-delay = <1200>;
 	vmmc-supply = <&vcc_sd>;
     vqmmc-supply = <&vccio_sd>;
-	supports-sd;
-	status = "okay";
 };
 
 &sdio {
@@ -532,16 +528,12 @@
     cap-sdio-irq;
     disable-wp;
     keep-power-in-suspend;
-    //max-frequency = <150000000>;
     max-frequency = <50000000>;
-    //mmc-pwrseq = <&sdio_pwrseq>;
     non-removable;
     num-slots = <1>;
     pinctrl-names = "default";
-    //pinctrl-0 = <&sdmmc0ext_bus4 &sdmmc0ext_cmd &sdmmc0ext_clk>;
     pinctrl-0 = <&sdmmc1_bus4 &sdmmc1_cmd &sdmmc1_clk>;
     supports-sdio;
-    //sd-uhs-sdr104;
     status = "disabled";
 };
 
@@ -595,7 +587,6 @@
 };
 
 &u2phy_otg {
-    phy-supply = <&vcc_host1_5v>;
     status = "okay";
 };
 
