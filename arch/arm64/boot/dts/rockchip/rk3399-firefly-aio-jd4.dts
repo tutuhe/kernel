@@ -155,14 +155,6 @@
 	status = "disabled";
 };
 
-&wlan {
-	status = "disabled";
-};
-
-&bluetooth {
-	status = "disabled";
-};
-
 &wdt {
 	status = "disabled";
 };
