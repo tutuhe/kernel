@@ -71,6 +71,52 @@
 		status = "okay";
 	};
 
+    wireless-wlan {                                                                        
+        compatible = "wlan-platdata";
+        /* wifi_chip_type - wifi chip define
+         * bcmwifi ==> like ap6xxx, rk90, ...x;
+         * rtkwifi ==> like rtl8188xx, rtl8723xx, ...;
+         * esp8089 ==> esp8089;
+         * other   ==> for other wifi;
+         */
+        wifi_chip_type = "ap6212a";
+        sdio_vref = <3300>; 
+        //1800mv or 3300mv
+        //keep_wifi_power_on;
+        //power_ctrl_by_pmu;
+        power_pmu_regulator = "vccio";
+        power_pmu_enable_level = <1>; //1->HIGH, 0->LOW
+
+        //vref_ctrl_enable;
+        //vref_ctrl_gpio = <&gpio0 GPIO_A2 GPIO_ACTIVE_HIGH>;
+        //vref_pmu_regulator = "act_ldo3";
+        //vref_pmu_enable_level = <1>; //1->HIGH, 0->LOW
+
+        WIFI,poweren_gpio = <&gpio1 11 GPIO_ACTIVE_HIGH>;
+        WIFI,host_wake_irq = <&gpio0 2 GPIO_ACTIVE_HIGH>;
+        //WIFI,reset_gpio = <&gpio0 GPIO_A2 GPIO_ACTIVE_LOW>;
+        status = "okay";
+      };
+
+/*    wireless-bluetooth {
+        compatible = "bluetooth-platdata";
+
+        //wifi-bt-power-toggle;
+
+        uart_rts_gpios = <&gpio0 17 GPIO_ACTIVE_LOW>;
+        pinctrl-names = "default","rts_gpio";
+        pinctrl-0 = <&uart0_rts>;
+        pinctrl-1 = <&uart0_rts_gpio>;
+        
+        //BT,power_gpio = <&gpio1 GPIO_B3 GPIO_ACTIVE_HIGH>;
+        BT,reset_gpio = <&gpio1 3 GPIO_ACTIVE_HIGH>;
+        BT,wake_gpio = <&gpio1 10 GPIO_ACTIVE_HIGH>;
+        BT,wake_host_irq = <&gpio1 9 GPIO_ACTIVE_LOW>;
+
+        status = "disable";
+    };*/
+
+
 	lvds_panel: lvds-panel {
 		status = "disabled";
 		ports {
@@ -151,29 +197,30 @@
             default-state = "off";
        	};
     };	
+
+    gpio-keys{
+        compatible = "gpio-keys";
+        #address-cells = <1>;
+        #size-cells = <0>;
+        autorepeat;
+        pinctrl-names = "default";
+        pinctrl-0 = <&pwrbtn>;
+        
+        button@0 {
+            gpios = <&gpio3 23 GPIO_ACTIVE_LOW>;
+            linux,code = <116>;
+            label = "GPIO Key Power";
+            linux,input-type = <1>;
+            gpio-key,wakeup = <1>;
+            debounce-interval = <100>;
+        };
+    };
 };
 
-
-/*&saradc
+&saradc
 {
     status = "okay";
-	key{                                                                                   
-		compatible = "rockchip,key";
-		io-channels = <&saradc 1>;
-		power-key {
-			gpios = <&gpio3 23 GPIO_ACTIVE_LOW>;
-			linux,code = <116>;
-			label = "power";
-			gpio-key,wakeup;
-			};
-
-		recovery-key {
-			linux,code = <113>;
-			label = "recovery";																
-			rockchip,adc_value = <4>;															
-			};
-	};
-};*/
+};
 
 &cpu0 {
 	cpu-supply = <&vdd_arm>;
@@ -479,12 +526,12 @@
             rockchip,pins = <2 3 RK_FUNC_GPIO &pcfg_pull_none>;
         };   
     };
-
-   /* button{
-        pwrbtn: pwrbtn { 
-            rockchip,pins = <2 23 RK_FUNC_GPIO &pcfg_pull_none>;
+    
+    buttons{
+        pwrbtn: pwrbtn{
+            rockchip,pins = <3 23 RK_FUNC_GPIO &pcfg_pull_none>;
         };
-    };*/
+    }; 
 };
 
 &sdmmc {
