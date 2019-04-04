@@ -312,17 +312,19 @@
 	clock-frequency = <400000>;
 
 	rk818: pmic@1c {
-		compatible = "rockchip,rk818";
 		status = "okay";
+		compatible = "rockchip,rk818";
 		reg = <0x1c>;
-		clock-output-names = "rk818-clkout1", "wifibt_32kin";
 		interrupt-parent = <&gpio3>;
 		interrupts = <22 IRQ_TYPE_LEVEL_LOW>;
+		pmic,stby-gpio = <&gpio0 RK_PD1 GPIO_ACTIVE_LOW>;
+		pmic,hold-gpio = <&gpio2 RK_PA0 GPIO_ACTIVE_HIGH>;
 		pinctrl-names = "default";
-		pinctrl-0 = <&pmic_int_l>;
+		pinctrl-0 = <&pmic_int_l &pmic_stby &pmic_hold>;
 		rockchip,system-power-controller;
 		wakeup-source;
 		#clock-cells = <1>;
+		clock-output-names = "rk818-clkout1", "wifibt_32kin";
 
 		vcc1-supply = <&vcc_sys>;
 		vcc2-supply = <&vcc_sys>;
@@ -548,6 +550,14 @@
 	pmic {
 		pmic_int_l: pmic-int-l {
 			rockchip,pins = <RK_GPIO3 22 RK_FUNC_GPIO &pcfg_pull_default>;
+		};
+
+		pmic_stby: pmic-stby {
+			rockchip,pins = <RK_GPIO0 25 RK_FUNC_GPIO &pcfg_pull_default>;	
+		};
+		
+		pmic_hold: pmic-hold {
+			rockchip,pins = <RK_GPIO2 0 RK_FUNC_GPIO &pcfg_pull_default>;	
 		};
 	};
 
