@@ -884,15 +884,17 @@ static void rk808_syscore_shutdown(void)
 			   RK808_RTC_INT_REG,
 			   (0x3 << 2), (0x0 << 2));
 
-	if (gpio_is_valid(rk808->stby_gpio)) {
-		printk("rk808->stby_gpio(%d) = low\n", rk808->stby_gpio);
-		gpio_direction_output(rk808->stby_gpio, 0);
-	}
+	if (system_state != SYSTEM_RESTART) {
+		if (gpio_is_valid(rk808->stby_gpio)) {
+			printk("rk808->stby_gpio(%d) = low\n", rk808->stby_gpio);
+			gpio_direction_output(rk808->stby_gpio, 0);
+		}
 
-	if (gpio_is_valid(rk808->hold_gpio)) {
-		printk("rk808->hold_gpio(%d) = low\n", rk808->hold_gpio);
-		gpio_direction_output(rk808->hold_gpio, 0);
-		mdelay(200);
+		if (gpio_is_valid(rk808->hold_gpio)) {
+			printk("rk808->hold_gpio(%d) = low\n", rk808->hold_gpio);
+			gpio_direction_output(rk808->hold_gpio, 0);
+			mdelay(200);
+		}
 	}
 
 	/*
