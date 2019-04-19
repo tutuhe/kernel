@@ -71,32 +71,15 @@
 		interrupts = <GIC_SPI 127 IRQ_TYPE_LEVEL_LOW>;
 		status = "okay";
 	};
-/*	
+	
     wireless-wlan {                 
 		compatible = "wlan-platdata";
-        //wifi_chip_type - wifi chip define
-        //bcmwifi ==> like ap6xxx, rk90, ...x;
-        //rtkwifi ==> like rtl8188xx, rtl8723xx, ...;
-        //esp8089 ==> esp8089;
-        //other   ==> for other wifi;
-        
         wifi_chip_type = "ap6212";
-        sdio_vref = <3300>; 
-        //1800mv or 3300mv
-        //keep_wifi_power_on;
-        //power_ctrl_by_pmu;
-        power_pmu_regulator = "vccio";
-        power_pmu_enable_level = <1>; //1->HIGH, 0->LOW
-
-        //vref_ctrl_enable;
-        //vref_ctrl_gpio = <&gpio0 GPIO_A2 GPIO_ACTIVE_HIGH>;
-        //vref_pmu_regulator = "act_ldo3";
-        //vref_pmu_enable_level = <1>; //1->HIGH, 0->LOW
-
-        WIFI,poweren_gpio = <&gpio1 11 GPIO_ACTIVE_HIGH>;
-        WIFI,host_wake_irq = <&gpio0 2 GPIO_ACTIVE_HIGH>;
-        //WIFI,reset_gpio = <&gpio0 GPIO_A2 GPIO_ACTIVE_LOW>;
-        status = "disabled";
+		sdio_vref = <3300>;
+		rockchip,grf = <&grf>;
+		//WIFI,poweren_gpio = <&gpio1 RK_PB3 GPIO_ACTIVE_HIGH>;
+		WIFI,host_wake_irq = <&gpio0 RK_PA2 GPIO_ACTIVE_HIGH>;
+        status = "okay";
       };
 
      wireless-bluetooth {
@@ -104,19 +87,19 @@
 
         //wifi-bt-power-toggle;
 
-        uart_rts_gpios = <&gpio0 17 GPIO_ACTIVE_LOW>;
+        uart_rts_gpios = <&gpio0 RK_PC1 GPIO_ACTIVE_LOW>;
         pinctrl-names = "default","rts_gpio";
         pinctrl-0 = <&uart0_rts>;
         pinctrl-1 = <&uart0_rts_gpio>;
         
         //BT,power_gpio = <&gpio1 GPIO_B3 GPIO_ACTIVE_HIGH>;
-        BT,reset_gpio = <&gpio1 3 GPIO_ACTIVE_HIGH>;
-        BT,wake_gpio = <&gpio1 10 GPIO_ACTIVE_HIGH>;
-        BT,wake_host_irq = <&gpio1 9 GPIO_ACTIVE_LOW>;
+        BT,reset_gpio = <&gpio1 RK_PA3 GPIO_ACTIVE_HIGH>;
+        BT,wake_gpio = <&gpio1 RK_PB2 GPIO_ACTIVE_HIGH>;
+        BT,wake_host_irq = <&gpio1 RK_PB1 GPIO_ACTIVE_LOW>;
 
-        status = "disable";
+        status = "okay";
     };
-*/
+
 
 	lvds_panel: lvds-panel {
 		status = "disabled";
@@ -180,8 +163,8 @@
 		regulator-name = "vcc_sdmmc";
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
-		startup-delay-us = <100000>;
-		vin-supply = <&vcc_io>;
+		//startup-delay-us = <100000>;
+		//vin-supply = <&vcc_io>;
 	};
 
 	xin32k: xin32k {
@@ -189,6 +172,13 @@
 		clock-frequency = <32768>;
 		clock-output-names = "xin32k";
 		#clock-cells = <0>;
+	};
+
+	sdio_pwrseq: sdio-pwrseq{
+		compatible = "mmc-pwrseq-simple";
+		pinctrl-name = "default";
+		pinctrl-0 = <&wifi_enable_h>;
+		reset-gpios = <&gpio1 RK_PB3 GPIO_ACTIVE_LOW>;
 	};
 
 	spdif_out: spdif-out {
@@ -593,6 +583,17 @@
 		};			
 	};
 
+	uart0{
+		uart0_rts_gpio: uart0-rts-gpio{
+			rockchip,pins = <0 RK_PC1 RK_FUNC_GPIO &pcfg_pull_none>;
+		}; 		
+	};
+
+	sdio-pwrseq{
+		wifi_enable_h: wifi-enable-h{
+			rockchip,pins = <1 RK_PB3 RK_FUNC_GPIO &pcfg_pull_up>;	
+		};		
+	};
 };
 
 &sdmmc {
@@ -609,13 +610,25 @@
 };
 
 &sdio {
-	cap-mmc-highspeed;
+	clock-frequency = <50000000>;
+	clock-freq-min-max = <200000 50000000>;
 	supports-sdio;
-	ignore-pm-notify;
-	keep-power-in-suspend;
-	non-removable;
+	disable-wp;
+	cap-sd-highspeed;
 	cap-sdio-irq;
-	status = "disabled";
+	keep-power-in-suspend;
+	pinctrl-names = "default";
+	pinctrl-0 = <&sdio_cmd &sdio_clk &sdio_bus4>;
+	mmc-pwrseq = <&sdio_pwrseq>;
+	non-removable;
+	sd-uhs-sdr104;
+	status = "okay";
+};
+
+&uart0{
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart0_xfer &uart0_cts>;
+	status = "okay";	
 };
 
 &u2phy {
@@ -670,11 +683,6 @@
 &hdmi{	
 	#sound-dai-cells = <0>;
     status = "okay";
-};
-
-&i2s_2ch{
-	status = "okay";	
-	#sound-dai-cells = <0>;
 };
 
 &i2s_8ch{
