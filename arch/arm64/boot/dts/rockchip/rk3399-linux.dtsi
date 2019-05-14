@@ -155,7 +155,7 @@
 			logo,kernel = "logo_kernel.bmp";
 			logo,mode = "center";
 			charge_logo,mode = "center";
-			connect = <&vopl_out_hdmi>;
+			connect = <&vopb_out_hdmi>;
 		};
 
 		route_dsi: route-dsi {
@@ -260,3 +260,34 @@
 		};
 	};
 };
+
+&uart2 {
+	status = "disabled";
+};
+
+&vopb {
+	status = "okay";
+};
+
+&vopb_mmu {
+	status = "okay";
+};
+
+&vopl {
+	status = "okay";
+};
+
+&vopl_mmu {
+	status = "okay";
+};
+
+&hdmi {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	#sound-dai-cells = <0>;
+	ddc-i2c-scl-high-time-ns = <9625>;
+	ddc-i2c-scl-low-time-ns = <10000>;
+	status = "okay";
+};
+
+
