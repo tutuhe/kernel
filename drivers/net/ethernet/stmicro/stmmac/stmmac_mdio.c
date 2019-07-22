@@ -37,6 +37,8 @@
 #define MII_BUSY 0x00000001
 #define MII_WRITE 0x00000002
 
+struct mii_bus *rtl8761_bus;
+
 static int stmmac_mdio_busy_wait(void __iomem *ioaddr, unsigned int mii_addr)
 {
 	unsigned long curr;
@@ -73,6 +75,7 @@ static int stmmac_mdio_read(struct mii_bus *bus, int phyaddr, int phyreg)
 	int data;
 	u16 regValue = (((phyaddr << 11) & (0x0000F800)) |
 			((phyreg << 6) & (0x000007C0)));
+	// return 0; // close phy read option, if use switch
 	regValue |= MII_BUSY | ((priv->clk_csr & 0xF) << 2);
 
 	if (stmmac_mdio_busy_wait(priv->ioaddr, mii_address))
@@ -86,6 +89,33 @@ static int stmmac_mdio_read(struct mii_bus *bus, int phyaddr, int phyreg)
 	/* Read the data from the MII data register */
 	data = (int)readl(priv->ioaddr + mii_data);
 
+	return data;
+}
+
+int stmmac_mdio_read_switch(struct mii_bus *bus, int phyaddr, int phyreg)
+{
+	struct net_device *ndev = rtl8761_bus->priv;
+	struct stmmac_priv *priv = netdev_priv(ndev);
+	unsigned int mii_address = priv->hw->mii.addr;
+	unsigned int mii_data = priv->hw->mii.data;
+
+	int data;
+	u16 regValue = (((phyaddr << 11) & (0x0000F800)) |
+					((phyreg << 6) & (0x000007C0)));
+	//printk("-------------mdio_read : phyaddr=%d,phyreg=%d\n",phyaddr,phyreg);
+	regValue |= MII_BUSY | ((priv->clk_csr & 0xF) << 2);
+
+	if (stmmac_mdio_busy_wait(priv->ioaddr, mii_address))
+		return -EBUSY;
+	//dump_stack();
+	writel(regValue, priv->ioaddr + mii_address);
+
+	if (stmmac_mdio_busy_wait(priv->ioaddr, mii_address))
+		return -EBUSY;
+
+	/* Read the data from the MII data register */
+	data = (int)readl(priv->ioaddr + mii_data);
+	//printk("=============mdio_read: data=%d\n",data);
 	return data;
 }
 
@@ -106,15 +136,39 @@ static int stmmac_mdio_write(struct mii_bus *bus, int phyaddr, int phyreg,
 	unsigned int mii_data = priv->hw->mii.data;
 
 	u16 value =
-	    (((phyaddr << 11) & (0x0000F800)) | ((phyreg << 6) & (0x000007C0)))
-	    | MII_WRITE;
-
+		(((phyaddr << 11) & (0x0000F800)) | ((phyreg << 6) & (0x000007C0))) | MII_WRITE;
+	//return 0;//close phy read option, if use switch
 	value |= MII_BUSY | ((priv->clk_csr & 0xF) << 2);
 
 	/* Wait until any existing MII operation is complete */
 	if (stmmac_mdio_busy_wait(priv->ioaddr, mii_address))
 		return -EBUSY;
 
+	/* Set the MII address register to write */
+	writel(phydata, priv->ioaddr + mii_data);
+	writel(value, priv->ioaddr + mii_address);
+
+	/* Wait until any existing MII operation is complete */
+	return stmmac_mdio_busy_wait(priv->ioaddr, mii_address);
+}
+
+int stmmac_mdio_write_switch(struct mii_bus *bus, int phyaddr, int phyreg,
+							 u16 phydata)
+{
+	struct net_device *ndev = bus->priv;
+	struct stmmac_priv *priv = netdev_priv(ndev);
+	unsigned int mii_address = priv->hw->mii.addr;
+	unsigned int mii_data = priv->hw->mii.data;
+
+	u16 value =
+		(((phyaddr << 11) & (0x0000F800)) | ((phyreg << 6) & (0x000007C0))) | MII_WRITE;
+	//printk("++++++++++++++++++++++++phyaddr=%d,phy_reg=%d,phydata=0x%x\n",phyaddr,phyreg,phydata);
+	value |= MII_BUSY | ((priv->clk_csr & 0xF) << 2);
+
+	/* Wait until any existing MII operation is complete */
+	if (stmmac_mdio_busy_wait(priv->ioaddr, mii_address))
+		return -EBUSY;
+	//dump_stack();
 	/* Set the MII address register to write */
 	writel(phydata, priv->ioaddr + mii_data);
 	writel(value, priv->ioaddr + mii_address);
@@ -204,6 +258,8 @@ int stmmac_mdio_register(struct net_device *ndev)
 	if (!mdio_bus_data)
 		return 0;
 
+	rtl8761_bus = new_bus;
+
 	new_bus = mdiobus_alloc();
 	if (new_bus == NULL)
 		return -ENOMEM;
@@ -292,6 +348,7 @@ int stmmac_mdio_register(struct net_device *ndev)
 	}
 
 	priv->mii = new_bus;
+	rtl8761_bus = new_bus;
 
 	return 0;
 

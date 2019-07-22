@@ -54,6 +54,8 @@
 #include <linux/reset.h>
 #include <linux/of_mdio.h>
 
+#include "./rtl8367c/rtk_switch.h"
+
 #define	STMMAC_ALIGN(x)		__ALIGN_KERNEL(x, SMP_CACHE_BYTES)
 #define RTL_8201F_PHY_ID  0x001cc816
 /* Module parameters */
@@ -706,6 +708,9 @@ static void stmmac_adjust_link(struct net_device *dev)
 
 	if (phydev->link) {
 		u32 ctrl = readl(priv->ioaddr + MAC_CTRL_REG);
+		
+		phydev->speed = SPEED_1000;
+		phydev->duplex = DUPLEX_FULL;
 
 		/* Now we make sure that we can be in full duplex mode.
 		 * If not, we operate in half-duplex mode. */
@@ -811,6 +816,7 @@ static void stmmac_check_pcs_mode(struct stmmac_priv *priv)
  *  Return value:
  *  0 on success
  */
+extern struct mii_bus *rtl8761_bus;
 static int stmmac_init_phy(struct net_device *dev)
 {
 	struct stmmac_priv *priv = netdev_priv(dev);
@@ -2991,6 +2997,7 @@ int stmmac_dvr_probe(struct device *device,
 	    priv->pcs != STMMAC_PCS_RTBI) {
 		/* MDIO bus Registration */
 		ret = stmmac_mdio_register(ndev);
+		rtk_switch_reg1b03();
 		if (ret < 0) {
 			pr_debug("%s: MDIO bus (id: %d) registration failed",
 				 __func__, priv->plat->bus_id);
