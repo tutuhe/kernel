@@ -198,7 +198,8 @@ stmmac_probe_config_dt(struct platform_device *pdev, const char **mac)
 		plat->has_gmac = 1;
 		plat->pmt = 1;
 	}
-
+	plat->unicast_filter_entries = 0;
+	printk("[%s:%d] plat->unicast_filter_entries:0x%x\n", __func__, __LINE__, plat->unicast_filter_entries);
 	if (of_device_is_compatible(np, "snps,dwmac-3.610") ||
 		of_device_is_compatible(np, "snps,dwmac-3.710")) {
 		plat->enh_desc = 1;
